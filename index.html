@@ -228,6 +228,8 @@
     .preview-meta strong { color: var(--gray-6); }
     .preview-empty { padding: 32px; text-align: center; color: var(--gray-4); font-size: 13px; }
     .preview-body { padding: 16px; min-height: 80px; font-size: 14px; line-height: 1.6; }
+    .preview-body ul, .preview-body ol { padding-left: 24px; margin: 6px 0; }
+    .preview-body li { margin: 2px 0; }
 
     .action-bar {
       display: flex; gap: 12px; align-items: center;
@@ -691,10 +693,22 @@ function insertVariable(colName) {
 }
 
 // ── Substitution ──────────────────────────────────────────────────
+function formatVal(val) {
+  const str = String(val).trim();
+  const num = Number(str);
+  if (str !== '' && !isNaN(num) && /^-?[\d.]+$/.test(str)) {
+    // Round floating-point noise (e.g. 12511499.9999999 → 12511500)
+    const rounded = Math.abs(num - Math.round(num)) < 0.01 ? Math.round(num) : num;
+    // Format with . as thousands separator (Vietnamese style)
+    return rounded.toLocaleString('de-DE').replace(',', '.');
+  }
+  return str;
+}
+
 function substitute(template, row) {
   return template.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
     const val = row[key.trim()];
-    return val !== undefined ? String(val) : '';
+    return val !== undefined ? formatVal(val) : '';
   });
 }
 
@@ -798,7 +812,7 @@ async function sendEmail(to, subject, bodyHtml) {
     '--' + boundary,
     'Content-Type: text/html; charset=UTF-8',
     '',
-    '<!DOCTYPE html><html><body>' + bodyHtml + '</body></html>',
+    '<!DOCTYPE html><html><head><style>ul,ol{padding-left:24px;margin:6px 0}li{margin:2px 0}</style></head><body>' + bodyHtml + '</body></html>',
     '',
     '--' + boundary + '--',
   ].join('\r\n');
