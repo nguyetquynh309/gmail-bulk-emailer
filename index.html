@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gmail Bulk Emailer</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #1a73e8;
+      --blue-dk: #1557b0;
+      --green:   #34a853;
+      --red:     #ea4335;
+      --gray-1:  #f8f9fa;
+      --gray-2:  #e8eaed;
+      --gray-3:  #bdc1c6;
+      --gray-4:  #80868b;
+      --gray-5:  #5f6368;
+      --gray-6:  #202124;
+      --radius:  8px;
+      --shadow:  0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,.16);
+    }
+
+    body {
+      font-family: 'Google Sans', Roboto, Arial, sans-serif;
+      font-size: 14px;
+      color: var(--gray-6);
+      background: var(--gray-1);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--gray-2);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 500; }
+    .logo svg { width: 28px; height: 28px; }
+
+    #btn-auth {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 20px; border: 1px solid var(--gray-3);
+      background: #fff; cursor: pointer; font-size: 14px; font-weight: 500;
+      transition: background .15s, box-shadow .15s;
+    }
+    #btn-auth:hover { background: var(--gray-1); box-shadow: var(--shadow); }
+    #btn-auth.connected { border-color: var(--green); color: var(--green); }
+    .auth-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-3); }
+    .auth-dot.on { background: var(--green); }
+
+    /* ── Setup Banner ── */
+    #setup-banner {
+      background: #fef9e7;
+      border-bottom: 1px solid #f9ca24;
+      padding: 10px 24px;
+      font-size: 13px;
+      color: #5f4c00;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #setup-banner a { color: var(--blue); }
+    #setup-banner button {
+      margin-left: auto;
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; color: var(--gray-4); line-height: 1;
+    }
+
+    /* ── Main Layout ── */
+    main {
+      max-width: 960px;
+      margin: 32px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-2);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header h2 { font-size: 15px; font-weight: 500; }
+    .step-badge {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-badge.done { background: var(--green); }
+    .card-body { padding: 20px; }
+
+    /* Locked overlay for incomplete steps */
+    .card-lock {
+      position: absolute;
+      inset: 0;
+      background: rgba(248,249,250,.82);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      z-index: 10;
+      border-radius: var(--radius);
+      pointer-events: none;
+    }
+    .card-lock.hidden { display: none; }
+    .lock-icon { font-size: 28px; }
+    .lock-text { font-size: 13px; color: var(--gray-5); }
+
+    /* ── Upload Zone ── */
+    #drop-zone {
+      border: 2px dashed var(--gray-3);
+      border-radius: var(--radius);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    #drop-zone:hover, #drop-zone.drag-over { border-color: var(--blue); background: #e8f0fe; }
+    #drop-zone svg { width: 40px; height: 40px; color: var(--gray-4); margin-bottom: 12px; }
+    #drop-zone p { color: var(--gray-5); }
+    #drop-zone strong { color: var(--blue); }
+    #file-input { display: none; }
+
+    .file-info {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #e6f4ea;
+      border: 1px solid #81c995;
+      border-radius: var(--radius);
+      margin-top: 12px;
+    }
+    .file-info.show { display: flex; }
+    .file-info svg { color: var(--green); flex-shrink: 0; }
+
+    /* ── Form Controls ── */
+    label.field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-5);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-3);
+      border-radius: var(--radius);
+      font-size: 14px;
+      color: var(--gray-6);
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+      appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235f6368' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 32px;
+    }
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,115,232,.15);
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px;
+      background: #e8f0fe; color: var(--blue);
+      border-radius: 12px; font-size: 12px; font-weight: 500;
+      cursor: pointer; user-select: none;
+      border: 1px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+    .chip:hover { background: #d2e3fc; border-color: var(--blue); }
+    .chip-hint { font-size: 12px; color: var(--gray-4); margin-bottom: 6px; }
+
+    /* ── Editor ── */
+    .editor-toolbar {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      padding: 8px;
+      border: 1px solid var(--gray-3);
+      border-bottom: none;
+      border-radius: var(--radius) var(--radius) 0 0;
+      background: var(--gray-1);
+    }
+    .tb-btn {
+      padding: 4px 8px; border: 1px solid var(--gray-3); border-radius: 4px;
+      background: #fff; cursor: pointer; font-size: 13px;
+      transition: background .1s;
+    }
+    .tb-btn:hover { background: var(--gray-2); }
+    .tb-btn b, .tb-btn i, .tb-btn u { pointer-events: none; }
+
+    #body-editor {
+      min-height: 220px;
+      padding: 14px;
+      border: 1px solid var(--gray-3);
+      border-radius: 0 0 var(--radius) var(--radius);
+      outline: none;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+    #body-editor:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,115,232,.15); }
+    #body-editor[placeholder]:empty::before {
+      content: attr(placeholder);
+      color: var(--gray-4);
+      pointer-events: none;
+    }
+
+    /* ── Preview ── */
+    .preview-nav {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .preview-nav button {
+      padding: 6px 14px; border-radius: 4px; border: 1px solid var(--gray-3);
+      background: #fff; cursor: pointer; font-size: 13px;
+      transition: background .1s;
+    }
+    .preview-nav button:hover:not(:disabled) { background: var(--gray-2); }
+    .preview-nav button:disabled { opacity: .4; cursor: default; }
+    .preview-count { font-size: 13px; color: var(--gray-5); }
+
+    .preview-email {
+      border: 1px solid var(--gray-2);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .preview-meta {
+      padding: 12px 16px;
+      background: var(--gray-1);
+      border-bottom: 1px solid var(--gray-2);
+      font-size: 13px;
+      color: var(--gray-5);
+    }
+    .preview-meta strong { color: var(--gray-6); }
+    .preview-empty {
+      padding: 32px;
+      text-align: center;
+      color: var(--gray-4);
+      font-size: 13px;
+    }
+    .preview-body { padding: 16px; min-height: 80px; font-size: 14px; line-height: 1.6; }
+
+    /* ── Action bar ── */
+    .action-bar {
+      display: flex; gap: 12px; align-items: center;
+      padding: 16px 20px;
+      border-top: 1px solid var(--gray-2);
+      background: var(--gray-1);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px; border-radius: 6px; border: none;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: background .15s, box-shadow .15s, opacity .15s;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-dk, #1557b0); box-shadow: var(--shadow); }
+    .btn-secondary { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
+    .btn-secondary:hover:not(:disabled) { background: #e8f0fe; }
+
+    /* ── Progress ── */
+    .progress-wrap { display: none; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .progress-wrap.show { display: flex; }
+    .progress-bar-bg { height: 6px; background: var(--gray-2); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; width: 0%; transition: width .3s; }
+    .progress-label { font-size: 12px; color: var(--gray-5); }
+
+    /* ── Auth hint ── */
+    .auth-hint {
+      font-size: 12px; color: var(--red);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .auth-hint.hidden { display: none; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; padding: 32px;
+      max-width: 480px; width: 90%;
+      box-shadow: var(--shadow-lg);
+      animation: pop .2s ease;
+    }
+    @keyframes pop { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-icon { font-size: 48px; text-align: center; margin-bottom: 16px; }
+    .modal h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; text-align: center; }
+    .modal p { color: var(--gray-5); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+    .result-list {
+      max-height: 200px; overflow-y: auto;
+      border: 1px solid var(--gray-2); border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+    .result-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--gray-2);
+      font-size: 13px;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .ri-icon { font-size: 16px; flex-shrink: 0; }
+    .ri-email { color: var(--gray-6); flex: 1; }
+    .ri-status { font-size: 12px; }
+    .result-item.ok .ri-status { color: var(--green); }
+    .result-item.fail .ri-status { color: var(--red); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--gray-6); color: #fff;
+      padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; z-index: 300;
+      transition: transform .3s, opacity .3s;
+      opacity: 0; white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    .text-muted { color: var(--gray-4); font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#4CAF50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"/>
+      <path fill="#1E88E5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"/>
+      <polygon fill="#E53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"/>
+      <path fill="#C62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"/>
+      <path fill="#FBC02D" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0C43.076,8,45,9.924,45,12.298z"/>
+    </svg>
+    Gmail Bulk Emailer
+  </div>
+
+  <button id="btn-auth" onclick="handleAuth()">
+    <span class="auth-dot" id="auth-dot"></span>
+    <span id="auth-label">Connect Gmail</span>
+  </button>
+</header>
+
+<!-- ═══ SETUP BANNER ═══ -->
+<div id="setup-banner">
+  ⚠️ &nbsp;<strong>First-time setup:</strong>&nbsp; This app must be opened via HTTPS (e.g. GitHub Pages).
+  Add your GitHub Pages URL as an <em>Authorized JavaScript origin</em> in
+  <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → Credentials</a>.
+  Your Pages URL will be: <code id="origin-display"></code>
+  <button onclick="document.getElementById('setup-banner').style.display='none'" title="Dismiss">✕</button>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<main>
+
+  <!-- STEP 1 — Upload -->
+  <div class="card">
+    <div class="card-header">
+      <span class="step-badge" id="badge-1">1</span>
+      <h2>Upload Excel File</h2>
+      <span class="text-muted" style="margin-left:auto">Column headers must be in row 6</span>
+    </div>
+    <div class="card-body">
+      <div id="drop-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="onDragOver(event)"
+           ondragleave="onDragLeave(event)"
+           ondrop="onDrop(event)">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p><strong>Click to browse</strong> or drag &amp; drop your Excel file here</p>
+        <p class="text-muted" style="margin-top:6px">Supports .xlsx · .xls</p>
+      </div>
+      <input type="file" id="file-input" accept=".xlsx,.xls" onchange="onFileSelected(event)" />
+
+      <div class="file-info" id="file-info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <div>
+          <strong id="file-name-display"></strong>
+          <div class="text-muted" id="file-row-count"></div>
+        </div>
+        <button class="btn btn-secondary" style="margin-left:auto;padding:6px 12px;font-size:12px" onclick="resetFile()">Change file</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 — Configure -->
+  <div class="card" id="step2-card">
+    <div class="card-lock" id="lock-2">
+      <span class="lock-icon">🔒</span>
+      <span class="lock-text">Upload a file first</span>
+    </div>
+    <div class="card-header">
+      <span class="step-badge" id="badge-2">2</span>
+      <h2>Select Email Column</h2>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <label class="field-label">Which column contains email addresses? *</label>
+          <select id="email-col-select">
+            <option value="">— select column —</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Columns found in file</label>
+          <div id="col-preview" style="font-size:13px;color:var(--gray-5);padding-top:6px;line-height:1.8">
+            —
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 — Template -->
+  <div class="card" id="step3-card">
+    <div class="card-lock" id="lock-3">
+      <span class="lock-icon">🔒</span>
+      <span class="lock-text">Upload a file and select the email column first</span>
+    </div>
+    <div class="card-header">
+      <span class="step-badge" id="badge-3">3</span>
+      <h2>Email Template</h2>
+    </div>
+    <div class="card-body">
+      <p class="text-muted" style="margin-bottom:12px">
+        Click a column chip to insert it as a <code>{{variable}}</code> into the subject or body at your cursor position.
+      </p>
+
+      <div class="chip-hint">Available columns — click to insert:</div>
+      <div class="chips" id="chip-container">
+        <span class="chip" style="opacity:.4;pointer-events:none">{{columns appear here}}</span>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label class="field-label">Email subject</label>
+        <input type="text" id="subject-field"
+               placeholder="e.g. Your salary slip for {{Month}}"
+               onfocus="setActiveField('subject')" />
+      </div>
+
+      <label class="field-label">Email body</label>
+      <div class="editor-toolbar">
+        <button class="tb-btn" onclick="fmt('bold')"><b>B</b></button>
+        <button class="tb-btn" onclick="fmt('italic')"><i>I</i></button>
+        <button class="tb-btn" onclick="fmt('underline')"><u>U</u></button>
+        <button class="tb-btn" onclick="fmt('strikeThrough')">S̶</button>
+        <button class="tb-btn" onclick="insertHeading()">H</button>
+        <button class="tb-btn" onclick="fmt('insertUnorderedList')">• List</button>
+        <button class="tb-btn" onclick="fmt('insertOrderedList')">1. List</button>
+        <button class="tb-btn" onclick="insertHR()">─</button>
+        <button class="tb-btn" onclick="insertLink()">🔗 Link</button>
+        <button class="tb-btn" onclick="fmt('removeFormat')">✕ Format</button>
+      </div>
+      <div id="body-editor" contenteditable="true" spellcheck="true"
+           placeholder="Write your email body here. Use {{ColumnName}} variables or click the column chips above."
+           onfocus="setActiveField('body')"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4 — Preview & Send -->
+  <div class="card" id="step4-card">
+    <div class="card-lock" id="lock-4">
+      <span class="lock-icon">🔒</span>
+      <span class="lock-text">Complete steps 1–3 first</span>
+    </div>
+    <div class="card-header">
+      <span class="step-badge" id="badge-4">4</span>
+      <h2>Preview &amp; Send</h2>
+    </div>
+    <div class="card-body">
+      <!-- Empty state -->
+      <div id="preview-empty" class="preview-empty">
+        Fill in the template above, then click <strong>Refresh Preview</strong> to see how each email will look.
+      </div>
+      <!-- Preview content (hidden until populated) -->
+      <div id="preview-content" style="display:none">
+        <div class="preview-nav">
+          <button onclick="prevPreview()" id="prev-btn">← Prev</button>
+          <span class="preview-count" id="preview-count"></span>
+          <button onclick="nextPreview()" id="next-btn">Next →</button>
+          <span class="text-muted" id="preview-warning" style="margin-left:auto"></span>
+        </div>
+        <div class="preview-email">
+          <div class="preview-meta">
+            <div><strong>To:</strong> <span id="prev-to"></span></div>
+            <div style="margin-top:4px"><strong>Subject:</strong> <span id="prev-subject"></span></div>
+          </div>
+          <div class="preview-body" id="prev-body"></div>
+        </div>
+      </div>
+    </div>
+    <div class="action-bar">
+      <button class="btn btn-secondary" onclick="refreshPreview()" id="preview-btn" disabled>
+        Refresh Preview
+      </button>
+      <button class="btn btn-primary" id="send-btn" onclick="startSend()" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Send All Emails
+      </button>
+      <span class="auth-hint hidden" id="auth-hint">⚠ Connect Gmail first (top right)</span>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="progress-label"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ RESULT MODAL ═══ -->
+<div class="modal-backdrop" id="result-modal">
+  <div class="modal">
+    <div class="modal-icon" id="modal-icon"></div>
+    <h3 id="modal-title"></h3>
+    <p id="modal-desc"></p>
+    <div class="result-list" id="result-list"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="closeModal()">Done</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ═══ SCRIPT ═══ -->
+<script>
+// ─── Config ──────────────────────────────────────────────────────
+const GOOGLE_CLIENT_ID = '832836024495-ejllm92mr3tch1tneo59ns96u4qi82cl.apps.googleusercontent.com';
+const GMAIL_SCOPE      = 'https://www.googleapis.com/auth/gmail.send';
+const HEADER_ROW_IDX   = 5; // 0-based index → row 6 in Excel
+
+// ─── State ───────────────────────────────────────────────────────
+let rows         = [];
+let headers      = [];
+let accessToken  = null;
+let tokenClient  = null;
+let activeField  = 'body';
+let savedRange   = null;
+let previewIndex = 0;
+
+// ─── Init ────────────────────────────────────────────────────────
+window.onload = () => {
+  // Show the correct origin in the setup banner
+  document.getElementById('origin-display').textContent =
+    location.protocol === 'file:' ? '(open via GitHub Pages to see URL)' : location.origin;
+
+  // Hide banner if already on HTTPS (GitHub Pages)
+  if (location.protocol === 'https:') {
+    document.getElementById('setup-banner').style.display = 'none';
+  }
+
+  if (typeof google !== 'undefined') {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GMAIL_SCOPE,
+      callback: (resp) => {
+        if (resp.error) { toast('Authentication failed: ' + resp.error); return; }
+        accessToken = resp.access_token;
+        setAuthUI(true);
+        toast('Gmail connected successfully!');
+        updateButtons();
+      },
+    });
+  }
+};
+
+// ─── Auth ─────────────────────────────────────────────────────────
+function handleAuth() {
+  if (location.protocol === 'file:') {
+    toast('Cannot sign in from a local file. Open this page via GitHub Pages.');
+    return;
+  }
+  if (!tokenClient) { toast('Google API not loaded yet, please wait.'); return; }
+  if (accessToken) {
+    google.accounts.oauth2.revoke(accessToken, () => {
+      accessToken = null;
+      setAuthUI(false);
+      updateButtons();
+      toast('Gmail disconnected.');
+    });
+  } else {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+}
+
+function setAuthUI(connected) {
+  document.getElementById('btn-auth').classList.toggle('connected', connected);
+  document.getElementById('auth-dot').classList.toggle('on', connected);
+  document.getElementById('auth-label').textContent =
+    connected ? 'Gmail Connected — Disconnect' : 'Connect Gmail';
+}
+
+// ─── File Upload ─────────────────────────────────────────────────
+function onDragOver(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function onDragLeave()  { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+}
+function onFileSelected(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+function processFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+
+      // Use row 6 (index 5) as header — works even if rows 1-5 are empty
+      rows = XLSX.utils.sheet_to_json(ws, { range: HEADER_ROW_IDX, defval: '' });
+
+      if (!rows.length) { toast('No data rows found after row 6.'); return; }
+
+      headers = Object.keys(rows[0]);
+
+      document.getElementById('file-name-display').textContent = file.name;
+      document.getElementById('file-row-count').textContent    = rows.length + ' data rows detected';
+      document.getElementById('file-info').classList.add('show');
+      document.getElementById('drop-zone').style.display = 'none';
+      document.getElementById('badge-1').classList.add('done');
+      document.getElementById('badge-1').textContent = '✓';
+
+      populateColumnUI();
+      unlockStep(2);
+      toast('File loaded — ' + rows.length + ' rows, ' + headers.length + ' columns');
+    } catch (err) {
+      toast('Error reading file: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function resetFile() {
+  rows = []; headers = [];
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-info').classList.remove('show');
+  document.getElementById('drop-zone').style.display = '';
+  document.getElementById('badge-1').classList.remove('done');
+  document.getElementById('badge-1').textContent = '1';
+  document.getElementById('email-col-select').innerHTML = '<option value="">— select column —</option>';
+  document.getElementById('col-preview').textContent = '—';
+  document.getElementById('chip-container').innerHTML =
+    '<span class="chip" style="opacity:.4;pointer-events:none">{{columns appear here}}</span>';
+  lockStep(2); lockStep(3); lockStep(4);
+  document.getElementById('preview-btn').disabled = true;
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('preview-empty').style.display = '';
+  document.getElementById('preview-content').style.display = 'none';
+}
+
+// ─── Step lock/unlock ─────────────────────────────────────────────
+function lockStep(n)   { document.getElementById('lock-' + n).classList.remove('hidden'); }
+function unlockStep(n) { document.getElementById('lock-' + n).classList.add('hidden'); }
+
+// ─── Column UI ────────────────────────────────────────────────────
+function populateColumnUI() {
+  const sel = document.getElementById('email-col-select');
+  sel.innerHTML = '<option value="">— select column —</option>';
+  headers.forEach(h => {
+    const opt = document.createElement('option');
+    opt.value = h; opt.textContent = h;
+    sel.appendChild(opt);
+    if (/email/i.test(h) && !sel.value) sel.value = h;
+  });
+
+  document.getElementById('col-preview').innerHTML =
+    headers.map(h => `<span style="display:inline-block;background:var(--gray-2);border-radius:4px;padding:1px 6px;margin:2px;font-size:12px">${h}</span>`).join('');
+
+  const container = document.getElementById('chip-container');
+  container.innerHTML = '';
+  headers.forEach(h => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = '{{' + h + '}}';
+    chip.onclick = () => insertVariable(h);
+    container.appendChild(chip);
+  });
+
+  sel.onchange = onEmailColChange;
+  onEmailColChange();
+}
+
+function onEmailColChange() {
+  const hasCol = !!document.getElementById('email-col-select').value;
+  if (hasCol) {
+    unlockStep(3);
+    unlockStep(4);
+    document.getElementById('preview-btn').disabled = false;
+    document.getElementById('badge-2').classList.add('done');
+    document.getElementById('badge-2').textContent = '✓';
+  } else {
+    lockStep(3); lockStep(4);
+    document.getElementById('preview-btn').disabled = true;
+    document.getElementById('badge-2').classList.remove('done');
+    document.getElementById('badge-2').textContent = '2';
+  }
+  updateButtons();
+}
+
+// ─── Editor ──────────────────────────────────────────────────────
+function setActiveField(field) { activeField = field; }
+function fmt(cmd) { document.getElementById('body-editor').focus(); document.execCommand(cmd, false, null); }
+function insertHeading() { document.getElementById('body-editor').focus(); document.execCommand('formatBlock', false, 'h3'); }
+function insertHR()      { document.getElementById('body-editor').focus(); document.execCommand('insertHTML', false, '<hr>'); }
+function insertLink() {
+  const url = prompt('Enter URL:'); if (!url) return;
+  const text = window.getSelection().toString() || url;
+  document.getElementById('body-editor').focus();
+  document.execCommand('insertHTML', false, `<a href="${url}" target="_blank">${text}</a>`);
+}
+
+function saveBodySelection() {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ed = document.getElementById('body-editor');
+  ed.addEventListener('keyup',   saveBodySelection);
+  ed.addEventListener('mouseup', saveBodySelection);
+  ed.addEventListener('blur',    saveBodySelection);
+});
+
+function insertVariable(colName) {
+  const token = '{{' + colName + '}}';
+  if (activeField === 'subject') {
+    const inp = document.getElementById('subject-field');
+    const s = inp.selectionStart, e = inp.selectionEnd;
+    inp.value = inp.value.slice(0, s) + token + inp.value.slice(e);
+    inp.selectionStart = inp.selectionEnd = s + token.length;
+    inp.focus();
+  } else {
+    const editor = document.getElementById('body-editor');
+    editor.focus();
+    const sel = window.getSelection();
+    if (savedRange) { sel.removeAllRanges(); sel.addRange(savedRange); }
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const node = document.createTextNode(token);
+      range.insertNode(node);
+      range.setStartAfter(node); range.collapse(true);
+      sel.removeAllRanges(); sel.addRange(range);
+      savedRange = range.cloneRange();
+    } else {
+      document.execCommand('insertText', false, token);
+    }
+  }
+}
+
+// ─── Substitution ─────────────────────────────────────────────────
+function substitute(template, row) {
+  return template.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
+    const val = row[key.trim()];
+    return val !== undefined ? String(val) : '{{' + key + '}}';
+  });
+}
+
+// ─── Preview ──────────────────────────────────────────────────────
+function refreshPreview() {
+  const emailCol = document.getElementById('email-col-select').value;
+  if (!emailCol || !rows.length) return;
+
+  document.getElementById('preview-empty').style.display = 'none';
+  document.getElementById('preview-content').style.display = '';
+  previewIndex = 0;
+  renderPreview();
+}
+
+function renderPreview() {
+  const emailCol = document.getElementById('email-col-select').value;
+  const row      = rows[previewIndex];
+  document.getElementById('prev-to').textContent      = row[emailCol] || '(no email)';
+  document.getElementById('prev-subject').textContent = substitute(document.getElementById('subject-field').value, row);
+  document.getElementById('prev-body').innerHTML      = substitute(document.getElementById('body-editor').innerHTML, row);
+  document.getElementById('preview-count').textContent = (previewIndex + 1) + ' of ' + rows.length;
+  document.getElementById('prev-btn').disabled = previewIndex === 0;
+  document.getElementById('next-btn').disabled = previewIndex === rows.length - 1;
+
+  const missing = rows.filter(r => !r[emailCol]).length;
+  document.getElementById('preview-warning').textContent =
+    missing ? '⚠ ' + missing + ' row(s) have no email address' : '';
+}
+
+function prevPreview() { if (previewIndex > 0) { previewIndex--; renderPreview(); } }
+function nextPreview() { if (previewIndex < rows.length - 1) { previewIndex++; renderPreview(); } }
+
+// ─── Buttons ─────────────────────────────────────────────────────
+function updateButtons() {
+  const emailCol = document.getElementById('email-col-select').value;
+  const ready    = accessToken && emailCol && rows.length > 0;
+  document.getElementById('send-btn').disabled = !ready;
+  document.getElementById('auth-hint').classList.toggle('hidden', !!accessToken || !emailCol);
+}
+
+// ─── Send ─────────────────────────────────────────────────────────
+async function startSend() {
+  if (!accessToken) { toast('Please connect Gmail first.'); return; }
+  const emailCol = document.getElementById('email-col-select').value;
+  if (!emailCol) { toast('Please select the email column.'); return; }
+
+  const subjectTpl = document.getElementById('subject-field').value;
+  const bodyTpl    = document.getElementById('body-editor').innerHTML;
+  const validRows  = rows.filter(r => r[emailCol] && String(r[emailCol]).includes('@'));
+
+  if (!validRows.length) { toast('No valid email addresses found.'); return; }
+  if (!confirm(`Ready to send ${validRows.length} email(s). Proceed?`)) return;
+
+  document.getElementById('send-btn').disabled    = true;
+  document.getElementById('preview-btn').disabled = true;
+  const pw = document.getElementById('progress-wrap');
+  pw.classList.add('show');
+
+  const results = [];
+  for (let i = 0; i < validRows.length; i++) {
+    const row     = validRows[i];
+    const to      = String(row[emailCol]).trim();
+    const subject = substitute(subjectTpl, row);
+    const body    = substitute(bodyTpl, row);
+
+    document.getElementById('progress-fill').style.width  = Math.round((i / validRows.length) * 100) + '%';
+    document.getElementById('progress-label').textContent = `Sending ${i + 1} of ${validRows.length}…`;
+
+    try   { await sendEmail(to, subject, body); results.push({ email: to, ok: true }); }
+    catch (err) { results.push({ email: to, ok: false, error: err.message }); }
+
+    if (i < validRows.length - 1) await sleep(400);
+  }
+
+  document.getElementById('progress-fill').style.width  = '100%';
+  document.getElementById('progress-label').textContent = 'Done!';
+  setTimeout(() => { pw.classList.remove('show'); document.getElementById('progress-fill').style.width = '0%'; }, 1500);
+  document.getElementById('send-btn').disabled    = false;
+  document.getElementById('preview-btn').disabled = false;
+  showResultModal(results);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function sendEmail(to, subject, bodyHtml) {
+  const boundary = 'b_' + Math.random().toString(36).slice(2);
+  const raw = [
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    'To: ' + to,
+    'Subject: =?UTF-8?B?' + btoa(unescape(encodeURIComponent(subject))) + '?=',
+    '',
+    '--' + boundary,
+    'Content-Type: text/plain; charset=UTF-8',
+    '',
+    bodyHtml.replace(/<[^>]+>/g, ''),
+    '',
+    '--' + boundary,
+    'Content-Type: text/html; charset=UTF-8',
+    '',
+    '<!DOCTYPE html><html><body>' + bodyHtml + '</body></html>',
+    '',
+    '--' + boundary + '--',
+  ].join('\r\n');
+
+  const encoded = btoa(unescape(encodeURIComponent(raw)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  const resp = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: encoded }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'HTTP ' + resp.status);
+  }
+  return resp.json();
+}
+
+// ─── Result Modal ─────────────────────────────────────────────────
+function showResultModal(results) {
+  const ok   = results.filter(r => r.ok);
+  const fail = results.filter(r => !r.ok);
+  document.getElementById('modal-icon').textContent  = fail.length === 0 ? '✅' : (ok.length ? '⚠️' : '❌');
+  document.getElementById('modal-title').textContent = fail.length === 0
+    ? ok.length + ' email(s) sent successfully!'
+    : ok.length + ' sent, ' + fail.length + ' failed';
+  document.getElementById('modal-desc').textContent  = fail.length === 0
+    ? 'All emails were delivered via Gmail.'
+    : 'Some emails could not be sent. See details below.';
+
+  const list = document.getElementById('result-list');
+  list.innerHTML = '';
+  results.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'result-item ' + (r.ok ? 'ok' : 'fail');
+    item.innerHTML = `
+      <span class="ri-icon">${r.ok ? '✓' : '✗'}</span>
+      <span class="ri-email">${r.email}</span>
+      <span class="ri-status">${r.ok ? 'Sent' : (r.error || 'Failed')}</span>`;
+    list.appendChild(item);
+  });
+
+  document.getElementById('result-modal').classList.add('show');
+}
+
+function closeModal() { document.getElementById('result-modal').classList.remove('show'); }
+
+// ─── Toast ────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
