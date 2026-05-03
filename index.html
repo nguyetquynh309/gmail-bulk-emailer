@@ -34,7 +34,6 @@
       min-height: 100vh;
     }
 
-    /* ── Header ── */
     header {
       background: #fff;
       border-bottom: 1px solid var(--gray-2);
@@ -62,7 +61,6 @@
     .auth-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-3); }
     .auth-dot.on { background: var(--green); }
 
-    /* ── Setup Banner ── */
     #setup-banner {
       background: #fef9e7;
       border-bottom: 1px solid #f9ca24;
@@ -80,7 +78,6 @@
       font-size: 18px; color: var(--gray-4); line-height: 1;
     }
 
-    /* ── Main Layout ── */
     main {
       max-width: 960px;
       margin: 32px auto;
@@ -90,7 +87,6 @@
       gap: 20px;
     }
 
-    /* ── Cards ── */
     .card {
       background: #fff;
       border-radius: var(--radius);
@@ -117,25 +113,18 @@
     .step-badge.done { background: var(--green); }
     .card-body { padding: 20px; }
 
-    /* Locked overlay for incomplete steps */
     .card-lock {
-      position: absolute;
-      inset: 0;
-      background: rgba(248,249,250,.82);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      z-index: 10;
-      border-radius: var(--radius);
+      position: absolute; inset: 0;
+      background: rgba(248,249,250,.85);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px;
+      z-index: 10; border-radius: var(--radius);
       pointer-events: none;
     }
     .card-lock.hidden { display: none; }
     .lock-icon { font-size: 28px; }
     .lock-text { font-size: 13px; color: var(--gray-5); }
 
-    /* ── Upload Zone ── */
     #drop-zone {
       border: 2px dashed var(--gray-3);
       border-radius: var(--radius);
@@ -151,59 +140,35 @@
     #file-input { display: none; }
 
     .file-info {
-      display: none;
-      align-items: center;
-      gap: 12px;
+      display: none; align-items: center; gap: 12px;
       padding: 12px 16px;
-      background: #e6f4ea;
-      border: 1px solid #81c995;
-      border-radius: var(--radius);
-      margin-top: 12px;
+      background: #e6f4ea; border: 1px solid #81c995;
+      border-radius: var(--radius); margin-top: 12px;
     }
     .file-info.show { display: flex; }
     .file-info svg { color: var(--green); flex-shrink: 0; }
 
-    /* ── Form Controls ── */
     label.field-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--gray-5);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--gray-5); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: .5px;
     }
 
-    select, input[type="text"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--gray-3);
-      border-radius: var(--radius);
-      font-size: 14px;
-      color: var(--gray-6);
-      background: #fff;
+    input[type="text"] {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--gray-3); border-radius: var(--radius);
+      font-size: 14px; color: var(--gray-6); background: #fff;
       transition: border-color .15s, box-shadow .15s;
-      appearance: none;
     }
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235f6368' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 32px;
-    }
-    select:focus, input[type="text"]:focus {
-      outline: none;
-      border-color: var(--blue);
+    input[type="text"]:focus {
+      outline: none; border-color: var(--blue);
       box-shadow: 0 0 0 3px rgba(26,115,232,.15);
     }
+    input[type="text"].field-highlight { border-color: var(--blue); }
 
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
-
-    /* ── Chips ── */
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     .chip {
-      display: inline-flex; align-items: center; gap: 4px;
+      display: inline-flex; align-items: center;
       padding: 4px 10px;
       background: #e8f0fe; color: var(--blue);
       border-radius: 12px; font-size: 12px; font-weight: 500;
@@ -214,7 +179,9 @@
     .chip:hover { background: #d2e3fc; border-color: var(--blue); }
     .chip-hint { font-size: 12px; color: var(--gray-4); margin-bottom: 6px; }
 
-    /* ── Editor ── */
+    .template-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+    .template-field { display: flex; flex-direction: column; gap: 6px; }
+
     .editor-toolbar {
       display: flex; flex-wrap: wrap; gap: 4px;
       padding: 8px;
@@ -232,66 +199,41 @@
     .tb-btn b, .tb-btn i, .tb-btn u { pointer-events: none; }
 
     #body-editor {
-      min-height: 220px;
-      padding: 14px;
+      min-height: 220px; padding: 14px;
       border: 1px solid var(--gray-3);
       border-radius: 0 0 var(--radius) var(--radius);
-      outline: none;
-      font-size: 14px;
-      line-height: 1.6;
-      overflow-y: auto;
+      outline: none; font-size: 14px; line-height: 1.6; overflow-y: auto;
     }
     #body-editor:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,115,232,.15); }
     #body-editor[placeholder]:empty::before {
-      content: attr(placeholder);
-      color: var(--gray-4);
-      pointer-events: none;
+      content: attr(placeholder); color: var(--gray-4); pointer-events: none;
     }
 
-    /* ── Preview ── */
     .preview-nav {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
     }
     .preview-nav button {
       padding: 6px 14px; border-radius: 4px; border: 1px solid var(--gray-3);
-      background: #fff; cursor: pointer; font-size: 13px;
-      transition: background .1s;
+      background: #fff; cursor: pointer; font-size: 13px; transition: background .1s;
     }
     .preview-nav button:hover:not(:disabled) { background: var(--gray-2); }
     .preview-nav button:disabled { opacity: .4; cursor: default; }
     .preview-count { font-size: 13px; color: var(--gray-5); }
 
-    .preview-email {
-      border: 1px solid var(--gray-2);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
+    .preview-email { border: 1px solid var(--gray-2); border-radius: var(--radius); overflow: hidden; }
     .preview-meta {
-      padding: 12px 16px;
-      background: var(--gray-1);
-      border-bottom: 1px solid var(--gray-2);
-      font-size: 13px;
-      color: var(--gray-5);
+      padding: 12px 16px; background: var(--gray-1);
+      border-bottom: 1px solid var(--gray-2); font-size: 13px; color: var(--gray-5);
     }
     .preview-meta strong { color: var(--gray-6); }
-    .preview-empty {
-      padding: 32px;
-      text-align: center;
-      color: var(--gray-4);
-      font-size: 13px;
-    }
+    .preview-empty { padding: 32px; text-align: center; color: var(--gray-4); font-size: 13px; }
     .preview-body { padding: 16px; min-height: 80px; font-size: 14px; line-height: 1.6; }
 
-    /* ── Action bar ── */
     .action-bar {
       display: flex; gap: 12px; align-items: center;
-      padding: 16px 20px;
-      border-top: 1px solid var(--gray-2);
-      background: var(--gray-1);
-      flex-wrap: wrap;
+      padding: 16px 20px; border-top: 1px solid var(--gray-2);
+      background: var(--gray-1); flex-wrap: wrap;
     }
-
     .btn {
       padding: 10px 20px; border-radius: 6px; border: none;
       font-size: 14px; font-weight: 500; cursor: pointer;
@@ -300,37 +242,28 @@
     }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn-primary { background: var(--blue); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: var(--blue-dk, #1557b0); box-shadow: var(--shadow); }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-dk); box-shadow: var(--shadow); }
     .btn-secondary { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
     .btn-secondary:hover:not(:disabled) { background: #e8f0fe; }
 
-    /* ── Progress ── */
     .progress-wrap { display: none; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
     .progress-wrap.show { display: flex; }
     .progress-bar-bg { height: 6px; background: var(--gray-2); border-radius: 3px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; width: 0%; transition: width .3s; }
     .progress-label { font-size: 12px; color: var(--gray-5); }
 
-    /* ── Auth hint ── */
-    .auth-hint {
-      font-size: 12px; color: var(--red);
-      display: flex; align-items: center; gap: 4px;
-    }
+    .auth-hint { font-size: 12px; color: var(--red); }
     .auth-hint.hidden { display: none; }
 
-    /* ── Modal ── */
     .modal-backdrop {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.4);
-      z-index: 200;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.4); z-index: 200;
       align-items: center; justify-content: center;
     }
     .modal-backdrop.show { display: flex; }
     .modal {
       background: #fff; border-radius: 12px; padding: 32px;
-      max-width: 480px; width: 90%;
-      box-shadow: var(--shadow-lg);
+      max-width: 480px; width: 90%; box-shadow: var(--shadow-lg);
       animation: pop .2s ease;
     }
     @keyframes pop { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -339,14 +272,11 @@
     .modal p { color: var(--gray-5); text-align: center; margin-bottom: 20px; line-height: 1.5; }
     .result-list {
       max-height: 200px; overflow-y: auto;
-      border: 1px solid var(--gray-2); border-radius: var(--radius);
-      margin-bottom: 20px;
+      border: 1px solid var(--gray-2); border-radius: var(--radius); margin-bottom: 20px;
     }
     .result-item {
       display: flex; align-items: center; gap: 10px;
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--gray-2);
-      font-size: 13px;
+      padding: 8px 12px; border-bottom: 1px solid var(--gray-2); font-size: 13px;
     }
     .result-item:last-child { border-bottom: none; }
     .ri-icon { font-size: 16px; flex-shrink: 0; }
@@ -355,9 +285,9 @@
     .result-item.ok .ri-status { color: var(--green); }
     .result-item.fail .ri-status { color: var(--red); }
 
-    /* ── Toast ── */
     #toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
       background: var(--gray-6); color: #fff;
       padding: 10px 20px; border-radius: 20px;
       font-size: 13px; z-index: 300;
@@ -365,13 +295,11 @@
       opacity: 0; white-space: nowrap;
     }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
     .text-muted { color: var(--gray-4); font-size: 12px; }
   </style>
 </head>
 <body>
 
-<!-- ═══ HEADER ═══ -->
 <header>
   <div class="logo">
     <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -383,23 +311,20 @@
     </svg>
     Gmail Bulk Emailer
   </div>
-
   <button id="btn-auth" onclick="handleAuth()">
     <span class="auth-dot" id="auth-dot"></span>
     <span id="auth-label">Connect Gmail</span>
   </button>
 </header>
 
-<!-- ═══ SETUP BANNER ═══ -->
 <div id="setup-banner">
-  ⚠️ &nbsp;<strong>First-time setup:</strong>&nbsp; This app must be opened via HTTPS (e.g. GitHub Pages).
-  Add your GitHub Pages URL as an <em>Authorized JavaScript origin</em> in
+  ⚠️ &nbsp;<strong>First-time setup:</strong>&nbsp; Open via HTTPS (GitHub Pages).
+  Add your Pages URL as an <em>Authorized JavaScript origin</em> in
   <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → Credentials</a>.
-  Your Pages URL will be: <code id="origin-display"></code>
-  <button onclick="document.getElementById('setup-banner').style.display='none'" title="Dismiss">✕</button>
+  Your URL: <code id="origin-display"></code>
+  <button onclick="document.getElementById('setup-banner').style.display='none'">✕</button>
 </div>
 
-<!-- ═══ MAIN ═══ -->
 <main>
 
   <!-- STEP 1 — Upload -->
@@ -423,11 +348,9 @@
         <p class="text-muted" style="margin-top:6px">Supports .xlsx · .xls</p>
       </div>
       <input type="file" id="file-input" accept=".xlsx,.xls" onchange="onFileSelected(event)" />
-
       <div class="file-info" id="file-info">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
         <div>
           <strong id="file-name-display"></strong>
@@ -438,7 +361,7 @@
     </div>
   </div>
 
-  <!-- STEP 2 — Configure -->
+  <!-- STEP 2 — Template -->
   <div class="card" id="step2-card">
     <div class="card-lock" id="lock-2">
       <span class="lock-icon">🔒</span>
@@ -446,54 +369,34 @@
     </div>
     <div class="card-header">
       <span class="step-badge" id="badge-2">2</span>
-      <h2>Select Email Column</h2>
-    </div>
-    <div class="card-body">
-      <div class="two-col">
-        <div>
-          <label class="field-label">Which column contains email addresses? *</label>
-          <select id="email-col-select">
-            <option value="">— select column —</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">Columns found in file</label>
-          <div id="col-preview" style="font-size:13px;color:var(--gray-5);padding-top:6px;line-height:1.8">
-            —
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3 — Template -->
-  <div class="card" id="step3-card">
-    <div class="card-lock" id="lock-3">
-      <span class="lock-icon">🔒</span>
-      <span class="lock-text">Upload a file and select the email column first</span>
-    </div>
-    <div class="card-header">
-      <span class="step-badge" id="badge-3">3</span>
       <h2>Email Template</h2>
     </div>
     <div class="card-body">
-      <p class="text-muted" style="margin-bottom:12px">
-        Click a column chip to insert it as a <code>{{variable}}</code> into the subject or body at your cursor position.
+      <p class="text-muted" style="margin-bottom:14px">
+        Click a column chip to insert <code>{{variable}}</code> into whichever field is active (Email address, Subject, or Body).
       </p>
 
-      <div class="chip-hint">Available columns — click to insert:</div>
+      <div class="chip-hint">Columns from your file — click to insert at cursor:</div>
       <div class="chips" id="chip-container">
-        <span class="chip" style="opacity:.4;pointer-events:none">{{columns appear here}}</span>
+        <span class="chip" style="opacity:.4;pointer-events:none">{{columns appear after upload}}</span>
       </div>
 
-      <div style="margin-bottom:16px">
-        <label class="field-label">Email subject</label>
-        <input type="text" id="subject-field"
-               placeholder="e.g. Your salary slip for {{Month}}"
-               onfocus="setActiveField('subject')" />
+      <div class="template-fields">
+        <div class="template-field">
+          <label class="field-label">Email address *</label>
+          <input type="text" id="emailto-field"
+                 placeholder="e.g. {{Email}} or {{Work Email}}"
+                 onfocus="setActiveField('emailto')" />
+        </div>
+        <div class="template-field">
+          <label class="field-label">Subject</label>
+          <input type="text" id="subject-field"
+                 placeholder="e.g. Your salary slip for {{Month}}"
+                 onfocus="setActiveField('subject')" />
+        </div>
       </div>
 
-      <label class="field-label">Email body</label>
+      <label class="field-label">Body</label>
       <div class="editor-toolbar">
         <button class="tb-btn" onclick="fmt('bold')"><b>B</b></button>
         <button class="tb-btn" onclick="fmt('italic')"><i>I</i></button>
@@ -507,27 +410,25 @@
         <button class="tb-btn" onclick="fmt('removeFormat')">✕ Format</button>
       </div>
       <div id="body-editor" contenteditable="true" spellcheck="true"
-           placeholder="Write your email body here. Use {{ColumnName}} variables or click the column chips above."
+           placeholder="Write your email body here. Click a column chip above to insert variables."
            onfocus="setActiveField('body')"></div>
     </div>
   </div>
 
-  <!-- STEP 4 — Preview & Send -->
-  <div class="card" id="step4-card">
-    <div class="card-lock" id="lock-4">
+  <!-- STEP 3 — Preview & Send -->
+  <div class="card" id="step3-card">
+    <div class="card-lock" id="lock-3">
       <span class="lock-icon">🔒</span>
-      <span class="lock-text">Complete steps 1–3 first</span>
+      <span class="lock-text">Upload a file first</span>
     </div>
     <div class="card-header">
-      <span class="step-badge" id="badge-4">4</span>
+      <span class="step-badge" id="badge-3">3</span>
       <h2>Preview &amp; Send</h2>
     </div>
     <div class="card-body">
-      <!-- Empty state -->
       <div id="preview-empty" class="preview-empty">
-        Fill in the template above, then click <strong>Refresh Preview</strong> to see how each email will look.
+        Fill in the template above, then click <strong>Refresh Preview</strong>.
       </div>
-      <!-- Preview content (hidden until populated) -->
       <div id="preview-content" style="display:none">
         <div class="preview-nav">
           <button onclick="prevPreview()" id="prev-btn">← Prev</button>
@@ -564,7 +465,6 @@
 
 </main>
 
-<!-- ═══ RESULT MODAL ═══ -->
 <div class="modal-backdrop" id="result-modal">
   <div class="modal">
     <div class="modal-icon" id="modal-icon"></div>
@@ -577,33 +477,26 @@
 
 <div id="toast"></div>
 
-<!-- ═══ SCRIPT ═══ -->
 <script>
-// ─── Config ──────────────────────────────────────────────────────
 const GOOGLE_CLIENT_ID = '832836024495-ejllm92mr3tch1tneo59ns96u4qi82cl.apps.googleusercontent.com';
 const GMAIL_SCOPE      = 'https://www.googleapis.com/auth/gmail.send';
-const HEADER_ROW_IDX   = 5; // 0-based index → row 6 in Excel
+const HEADER_ROW       = 6; // 1-based row number in Excel
 
-// ─── State ───────────────────────────────────────────────────────
 let rows         = [];
 let headers      = [];
 let accessToken  = null;
 let tokenClient  = null;
-let activeField  = 'body';
+let activeField  = 'body'; // 'emailto' | 'subject' | 'body'
 let savedRange   = null;
 let previewIndex = 0;
 
-// ─── Init ────────────────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────────────
 window.onload = () => {
-  // Show the correct origin in the setup banner
   document.getElementById('origin-display').textContent =
     location.protocol === 'file:' ? '(open via GitHub Pages to see URL)' : location.origin;
-
-  // Hide banner if already on HTTPS (GitHub Pages)
   if (location.protocol === 'https:') {
     document.getElementById('setup-banner').style.display = 'none';
   }
-
   if (typeof google !== 'undefined') {
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
@@ -619,79 +512,79 @@ window.onload = () => {
   }
 };
 
-// ─── Auth ─────────────────────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────────────
 function handleAuth() {
-  if (location.protocol === 'file:') {
-    toast('Cannot sign in from a local file. Open this page via GitHub Pages.');
-    return;
-  }
+  if (location.protocol === 'file:') { toast('Open this page via GitHub Pages to sign in.'); return; }
   if (!tokenClient) { toast('Google API not loaded yet, please wait.'); return; }
   if (accessToken) {
     google.accounts.oauth2.revoke(accessToken, () => {
-      accessToken = null;
-      setAuthUI(false);
-      updateButtons();
-      toast('Gmail disconnected.');
+      accessToken = null; setAuthUI(false); updateButtons(); toast('Gmail disconnected.');
     });
   } else {
     tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 }
 
-function setAuthUI(connected) {
-  document.getElementById('btn-auth').classList.toggle('connected', connected);
-  document.getElementById('auth-dot').classList.toggle('on', connected);
-  document.getElementById('auth-label').textContent =
-    connected ? 'Gmail Connected — Disconnect' : 'Connect Gmail';
+function setAuthUI(on) {
+  document.getElementById('btn-auth').classList.toggle('connected', on);
+  document.getElementById('auth-dot').classList.toggle('on', on);
+  document.getElementById('auth-label').textContent = on ? 'Gmail Connected — Disconnect' : 'Connect Gmail';
 }
 
-// ─── File Upload ─────────────────────────────────────────────────
+// ── File Upload ───────────────────────────────────────────────────
 function onDragOver(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
 function onDragLeave()  { document.getElementById('drop-zone').classList.remove('drag-over'); }
 function onDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drag-over');
+  e.preventDefault(); document.getElementById('drop-zone').classList.remove('drag-over');
   if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
 }
 function onFileSelected(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
 
 function processFile(file) {
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = (ev) => {
     try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const wb = XLSX.read(ev.target.result, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
 
       if (!ws['!ref']) { toast('Sheet appears to be empty.'); return; }
 
-      // Pass an absolute range object so SheetJS uses row 6 (index 5) as the
-      // header regardless of where the sheet's used range starts.
-      const sheetRange = XLSX.utils.decode_range(ws['!ref']);
-      const parseRange = { s: { r: HEADER_ROW_IDX, c: sheetRange.s.c }, e: sheetRange.e };
+      // sheet_to_json with header:1 returns arrays starting from sheetRange.s.r (the first
+      // used row). Compute the offset so allData[headerIdx] always maps to HEADER_ROW.
+      const sheetRange  = XLSX.utils.decode_range(ws['!ref']);
+      const firstUsedRow = sheetRange.s.r;          // 0-based first row in the file
+      const headerIdx   = (HEADER_ROW - 1) - firstUsedRow; // index inside allData
 
-      rows = XLSX.utils.sheet_to_json(ws, { range: parseRange, defval: '' });
+      const allData = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-      if (!rows.length) { toast('No data rows found after row 6. Check your file.'); return; }
+      if (headerIdx < 0 || headerIdx >= allData.length) {
+        toast('Row ' + HEADER_ROW + ' not found — the file may have fewer rows than expected.'); return;
+      }
 
-      headers = Object.keys(rows[0]).map(h => String(h).trim()).filter(h => h);
-      if (!headers.length) { toast('Row 6 appears empty — no column headers found.'); return; }
+      headers = allData[headerIdx].map(h => String(h).trim()).filter(h => h);
+      if (!headers.length) {
+        toast('Row ' + HEADER_ROW + ' appears empty — no column headers found.'); return;
+      }
 
-      // Re-map to ensure header keys are trimmed strings
-      rows = rows.map(r => {
+      const dataArrays = allData.slice(headerIdx + 1).filter(r => r.some(c => c !== ''));
+      if (!dataArrays.length) { toast('No data rows found after row ' + HEADER_ROW + '.'); return; }
+
+      rows = dataArrays.map(r => {
         const obj = {};
-        Object.entries(r).forEach(([k, v]) => { obj[String(k).trim()] = String(v); });
+        headers.forEach((h, i) => { obj[h] = r[i] !== undefined ? String(r[i]) : ''; });
         return obj;
       });
 
       document.getElementById('file-name-display').textContent = file.name;
-      document.getElementById('file-row-count').textContent    = rows.length + ' data rows detected';
+      document.getElementById('file-row-count').textContent    = rows.length + ' data rows · ' + headers.length + ' columns';
       document.getElementById('file-info').classList.add('show');
       document.getElementById('drop-zone').style.display = 'none';
       document.getElementById('badge-1').classList.add('done');
       document.getElementById('badge-1').textContent = '✓';
 
-      populateColumnUI();
-      unlockStep(2);
+      populateChips();
+      unlockStep(2); unlockStep(3);
+      updateButtons();
       toast('File loaded — ' + rows.length + ' rows, ' + headers.length + ' columns');
     } catch (err) {
       toast('Error reading file: ' + err.message);
@@ -707,35 +600,21 @@ function resetFile() {
   document.getElementById('drop-zone').style.display = '';
   document.getElementById('badge-1').classList.remove('done');
   document.getElementById('badge-1').textContent = '1';
-  document.getElementById('email-col-select').innerHTML = '<option value="">— select column —</option>';
-  document.getElementById('col-preview').textContent = '—';
   document.getElementById('chip-container').innerHTML =
-    '<span class="chip" style="opacity:.4;pointer-events:none">{{columns appear here}}</span>';
-  lockStep(2); lockStep(3); lockStep(4);
+    '<span class="chip" style="opacity:.4;pointer-events:none">{{columns appear after upload}}</span>';
+  lockStep(2); lockStep(3);
   document.getElementById('preview-btn').disabled = true;
   document.getElementById('send-btn').disabled = true;
   document.getElementById('preview-empty').style.display = '';
   document.getElementById('preview-content').style.display = 'none';
 }
 
-// ─── Step lock/unlock ─────────────────────────────────────────────
+// ── Lock/unlock ───────────────────────────────────────────────────
 function lockStep(n)   { document.getElementById('lock-' + n).classList.remove('hidden'); }
 function unlockStep(n) { document.getElementById('lock-' + n).classList.add('hidden'); }
 
-// ─── Column UI ────────────────────────────────────────────────────
-function populateColumnUI() {
-  const sel = document.getElementById('email-col-select');
-  sel.innerHTML = '<option value="">— select column —</option>';
-  headers.forEach(h => {
-    const opt = document.createElement('option');
-    opt.value = h; opt.textContent = h;
-    sel.appendChild(opt);
-    if (/email/i.test(h) && !sel.value) sel.value = h;
-  });
-
-  document.getElementById('col-preview').innerHTML =
-    headers.map(h => `<span style="display:inline-block;background:var(--gray-2);border-radius:4px;padding:1px 6px;margin:2px;font-size:12px">${h}</span>`).join('');
-
+// ── Chips ─────────────────────────────────────────────────────────
+function populateChips() {
   const container = document.getElementById('chip-container');
   container.innerHTML = '';
   headers.forEach(h => {
@@ -746,28 +625,15 @@ function populateColumnUI() {
     container.appendChild(chip);
   });
 
-  sel.onchange = onEmailColChange;
-  onEmailColChange();
-}
-
-function onEmailColChange() {
-  const hasCol = !!document.getElementById('email-col-select').value;
-  if (hasCol) {
-    unlockStep(3);
-    unlockStep(4);
-    document.getElementById('preview-btn').disabled = false;
-    document.getElementById('badge-2').classList.add('done');
-    document.getElementById('badge-2').textContent = '✓';
-  } else {
-    lockStep(3); lockStep(4);
-    document.getElementById('preview-btn').disabled = true;
-    document.getElementById('badge-2').classList.remove('done');
-    document.getElementById('badge-2').textContent = '2';
+  // Auto-fill email field if a likely column is found and field is empty
+  const emailField = document.getElementById('emailto-field');
+  if (!emailField.value) {
+    const guess = headers.find(h => /email/i.test(h));
+    if (guess) emailField.value = '{{' + guess + '}}';
   }
-  updateButtons();
 }
 
-// ─── Editor ──────────────────────────────────────────────────────
+// ── Editor ────────────────────────────────────────────────────────
 function setActiveField(field) { activeField = field; }
 function fmt(cmd) { document.getElementById('body-editor').focus(); document.execCommand(cmd, false, null); }
 function insertHeading() { document.getElementById('body-editor').focus(); document.execCommand('formatBlock', false, 'h3'); }
@@ -793,8 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function insertVariable(colName) {
   const token = '{{' + colName + '}}';
-  if (activeField === 'subject') {
-    const inp = document.getElementById('subject-field');
+  if (activeField === 'emailto' || activeField === 'subject') {
+    const inp = document.getElementById(activeField === 'emailto' ? 'emailto-field' : 'subject-field');
     const s = inp.selectionStart, e = inp.selectionEnd;
     inp.value = inp.value.slice(0, s) + token + inp.value.slice(e);
     inp.selectionStart = inp.selectionEnd = s + token.length;
@@ -818,19 +684,17 @@ function insertVariable(colName) {
   }
 }
 
-// ─── Substitution ─────────────────────────────────────────────────
+// ── Substitution ──────────────────────────────────────────────────
 function substitute(template, row) {
   return template.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
     const val = row[key.trim()];
-    return val !== undefined ? String(val) : '{{' + key + '}}';
+    return val !== undefined ? String(val) : '';
   });
 }
 
-// ─── Preview ──────────────────────────────────────────────────────
+// ── Preview ───────────────────────────────────────────────────────
 function refreshPreview() {
-  const emailCol = document.getElementById('email-col-select').value;
-  if (!emailCol || !rows.length) return;
-
+  if (!rows.length) return;
   document.getElementById('preview-empty').style.display = 'none';
   document.getElementById('preview-content').style.display = '';
   previewIndex = 0;
@@ -838,58 +702,60 @@ function refreshPreview() {
 }
 
 function renderPreview() {
-  const emailCol = document.getElementById('email-col-select').value;
-  const row      = rows[previewIndex];
-  document.getElementById('prev-to').textContent      = row[emailCol] || '(no email)';
+  const row        = rows[previewIndex];
+  const emailToTpl = document.getElementById('emailto-field').value;
+  const resolvedTo = substitute(emailToTpl, row);
+
+  document.getElementById('prev-to').textContent      = resolvedTo || '(no email)';
   document.getElementById('prev-subject').textContent = substitute(document.getElementById('subject-field').value, row);
   document.getElementById('prev-body').innerHTML      = substitute(document.getElementById('body-editor').innerHTML, row);
   document.getElementById('preview-count').textContent = (previewIndex + 1) + ' of ' + rows.length;
   document.getElementById('prev-btn').disabled = previewIndex === 0;
   document.getElementById('next-btn').disabled = previewIndex === rows.length - 1;
 
-  const missing = rows.filter(r => !r[emailCol]).length;
+  const missing = rows.filter(r => !substitute(emailToTpl, r).includes('@')).length;
   document.getElementById('preview-warning').textContent =
-    missing ? '⚠ ' + missing + ' row(s) have no email address' : '';
+    missing ? '⚠ ' + missing + ' row(s) have no valid email' : '';
 }
 
-function prevPreview() { if (previewIndex > 0) { previewIndex--; renderPreview(); } }
+function prevPreview() { if (previewIndex > 0)               { previewIndex--; renderPreview(); } }
 function nextPreview() { if (previewIndex < rows.length - 1) { previewIndex++; renderPreview(); } }
 
-// ─── Buttons ─────────────────────────────────────────────────────
+// ── Buttons ───────────────────────────────────────────────────────
 function updateButtons() {
-  const emailCol = document.getElementById('email-col-select').value;
-  const ready    = accessToken && emailCol && rows.length > 0;
-  document.getElementById('send-btn').disabled = !ready;
-  document.getElementById('auth-hint').classList.toggle('hidden', !!accessToken || !emailCol);
+  const ready = accessToken && rows.length > 0;
+  document.getElementById('send-btn').disabled    = !ready;
+  document.getElementById('preview-btn').disabled = !rows.length;
+  document.getElementById('auth-hint').classList.toggle('hidden', !!accessToken || !rows.length);
 }
 
-// ─── Send ─────────────────────────────────────────────────────────
+// ── Send ──────────────────────────────────────────────────────────
 async function startSend() {
   if (!accessToken) { toast('Please connect Gmail first.'); return; }
-  const emailCol = document.getElementById('email-col-select').value;
-  if (!emailCol) { toast('Please select the email column.'); return; }
+
+  const emailToTpl = document.getElementById('emailto-field').value.trim();
+  if (!emailToTpl) { toast('Please fill in the Email address field.'); return; }
 
   const subjectTpl = document.getElementById('subject-field').value;
   const bodyTpl    = document.getElementById('body-editor').innerHTML;
-  const validRows  = rows.filter(r => r[emailCol] && String(r[emailCol]).includes('@'));
 
-  if (!validRows.length) { toast('No valid email addresses found.'); return; }
-  if (!confirm(`Ready to send ${validRows.length} email(s). Proceed?`)) return;
+  const validRows = rows.filter(r => substitute(emailToTpl, r).includes('@'));
+  if (!validRows.length) { toast('No valid email addresses found. Check the Email address field.'); return; }
+  if (!confirm('Ready to send ' + validRows.length + ' email(s). Proceed?')) return;
 
   document.getElementById('send-btn').disabled    = true;
   document.getElementById('preview-btn').disabled = true;
-  const pw = document.getElementById('progress-wrap');
-  pw.classList.add('show');
+  document.getElementById('progress-wrap').classList.add('show');
 
   const results = [];
   for (let i = 0; i < validRows.length; i++) {
     const row     = validRows[i];
-    const to      = String(row[emailCol]).trim();
+    const to      = substitute(emailToTpl, row).trim();
     const subject = substitute(subjectTpl, row);
     const body    = substitute(bodyTpl, row);
 
     document.getElementById('progress-fill').style.width  = Math.round((i / validRows.length) * 100) + '%';
-    document.getElementById('progress-label').textContent = `Sending ${i + 1} of ${validRows.length}…`;
+    document.getElementById('progress-label').textContent = 'Sending ' + (i + 1) + ' of ' + validRows.length + '…';
 
     try   { await sendEmail(to, subject, body); results.push({ email: to, ok: true }); }
     catch (err) { results.push({ email: to, ok: false, error: err.message }); }
@@ -899,7 +765,10 @@ async function startSend() {
 
   document.getElementById('progress-fill').style.width  = '100%';
   document.getElementById('progress-label').textContent = 'Done!';
-  setTimeout(() => { pw.classList.remove('show'); document.getElementById('progress-fill').style.width = '0%'; }, 1500);
+  setTimeout(() => {
+    document.getElementById('progress-wrap').classList.remove('show');
+    document.getElementById('progress-fill').style.width = '0%';
+  }, 1500);
   document.getElementById('send-btn').disabled    = false;
   document.getElementById('preview-btn').disabled = false;
   showResultModal(results);
@@ -911,7 +780,7 @@ async function sendEmail(to, subject, bodyHtml) {
   const boundary = 'b_' + Math.random().toString(36).slice(2);
   const raw = [
     'MIME-Version: 1.0',
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    'Content-Type: multipart/alternative; boundary="' + boundary + '"',
     'To: ' + to,
     'Subject: =?UTF-8?B?' + btoa(unescape(encodeURIComponent(subject))) + '?=',
     '',
@@ -944,7 +813,7 @@ async function sendEmail(to, subject, bodyHtml) {
   return resp.json();
 }
 
-// ─── Result Modal ─────────────────────────────────────────────────
+// ── Result Modal ──────────────────────────────────────────────────
 function showResultModal(results) {
   const ok   = results.filter(r => r.ok);
   const fail = results.filter(r => !r.ok);
@@ -961,19 +830,18 @@ function showResultModal(results) {
   results.forEach(r => {
     const item = document.createElement('div');
     item.className = 'result-item ' + (r.ok ? 'ok' : 'fail');
-    item.innerHTML = `
-      <span class="ri-icon">${r.ok ? '✓' : '✗'}</span>
-      <span class="ri-email">${r.email}</span>
-      <span class="ri-status">${r.ok ? 'Sent' : (r.error || 'Failed')}</span>`;
+    item.innerHTML =
+      '<span class="ri-icon">' + (r.ok ? '✓' : '✗') + '</span>' +
+      '<span class="ri-email">' + r.email + '</span>' +
+      '<span class="ri-status">' + (r.ok ? 'Sent' : (r.error || 'Failed')) + '</span>';
     list.appendChild(item);
   });
-
   document.getElementById('result-modal').classList.add('show');
 }
 
 function closeModal() { document.getElementById('result-modal').classList.remove('show'); }
 
-// ─── Toast ────────────────────────────────────────────────────────
+// ── Toast ─────────────────────────────────────────────────────────
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
