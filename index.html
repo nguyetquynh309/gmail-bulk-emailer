@@ -662,12 +662,34 @@ function processFile(file) {
       const wb = XLSX.read(e.target.result, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
 
-      // Use row 6 (index 5) as header — works even if rows 1-5 are empty
-      rows = XLSX.utils.sheet_to_json(ws, { range: HEADER_ROW_IDX, defval: '' });
+      // Expand the sheet's used-range to always start from row 1 (index 0),
+      // so that empty rows 1-5 are included and row 6 lands at index 5.
+      if (ws['!ref']) {
+        const ref = XLSX.utils.decode_range(ws['!ref']);
+        ref.s.r = 0;
+        ws['!ref'] = XLSX.utils.encode_range(ref);
+      }
 
-      if (!rows.length) { toast('No data rows found after row 6.'); return; }
+      // Read every row including blank ones so the index is always absolute.
+      const allData = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', blankrows: true });
 
-      headers = Object.keys(rows[0]);
+      if (allData.length <= HEADER_ROW_IDX) {
+        toast('The file has fewer than 6 rows — no header found.'); return;
+      }
+
+      headers = allData[HEADER_ROW_IDX].map(h => String(h).trim()).filter(h => h);
+      if (!headers.length) {
+        toast('Row 6 is empty — no column headers found. Check your file.'); return;
+      }
+
+      const dataRows = allData.slice(HEADER_ROW_IDX + 1).filter(r => r.some(c => c !== ''));
+      if (!dataRows.length) { toast('No data rows found after row 6.'); return; }
+
+      rows = dataRows.map(r => {
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = r[i] !== undefined ? String(r[i]) : ''; });
+        return obj;
+      });
 
       document.getElementById('file-name-display').textContent = file.name;
       document.getElementById('file-row-count').textContent    = rows.length + ' data rows detected';
