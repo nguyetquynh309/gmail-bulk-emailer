@@ -545,7 +545,10 @@ function processFile(file) {
   reader.onload = (ev) => {
     try {
       const wb = XLSX.read(ev.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
+      const TARGET_SHEET = 'tổng hợp';
+      const sheetName = wb.SheetNames.find(n => n.trim().toLowerCase() === TARGET_SHEET.toLowerCase())
+                        || wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
 
       if (!ws['!ref']) { toast('Sheet appears to be empty.'); return; }
 
