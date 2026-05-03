@@ -550,7 +550,10 @@ function processFile(file) {
                         || wb.SheetNames[0];
       const ws = wb.Sheets[sheetName];
 
-      if (!ws['!ref']) { toast('Sheet appears to be empty.'); return; }
+      // Diagnostic: show sheet names so we can verify what was found
+      toast('Sheets found: ' + wb.SheetNames.join(', ') + ' | Using: ' + sheetName);
+
+      if (!ws || !ws['!ref']) { toast('Sheet "' + sheetName + '" appears to be empty.'); return; }
 
       // sheet_to_json with header:1 returns arrays starting from sheetRange.s.r (the first
       // used row). Compute the offset so allData[headerIdx] always maps to HEADER_ROW.
